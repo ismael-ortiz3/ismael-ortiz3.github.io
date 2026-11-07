@@ -319,6 +319,44 @@ a.stat{color:inherit; text-decoration:none; transition:background .3s var(--ease
 .dl{display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; --btn-fill:var(--field-a); --btn-on:#fff}
 .dl .btn{border-color:var(--field-line)}
 
+/* floating wayfinding: left rail (desktop) + bottom pill (TOP, and Sections on phones/tablets); shown after leaving the hero */
+.rail, .pill{opacity:0; visibility:hidden; transition:opacity .45s var(--ease-out), transform .45s var(--ease-out), visibility 0s linear .45s}
+.rail.show, .pill.show{visibility:visible; transition:opacity .45s var(--ease-out), transform .45s var(--ease-out), visibility 0s}
+.rail{position:fixed; z-index:7; left:max(16px, env(safe-area-inset-left, 0px)); top:50%; transform:translate(-8px, -50%); display:none}
+.rail.show{opacity:.5; transform:translate(0, -50%)}
+.rail:hover, .rail:focus-within{opacity:1}
+.rail ol{list-style:none; display:grid; gap:2px; padding:10px 0}
+.rail a{display:grid; grid-template-columns:10px auto; gap:12px; align-items:center; padding:5px 10px 5px 4px; border-radius:6px; text-decoration:none; color:var(--ink-3); font-family:var(--f-mono); font-size:.6875rem; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; transition:color .25s}
+.rail a::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor; justify-self:center; transition:all .3s var(--ease-out)}
+.rail a:hover{color:var(--ink)}
+.rail a.on{color:var(--accent)}
+.rail a.on::before{width:9px; height:9px; box-shadow:0 0 0 4px var(--accent-soft)}
+@media (min-width:1100px){ .rail{display:block} }
+@media (min-width:1100px) and (max-width:1439px){
+  .rail a{grid-template-columns:10px; padding:6px 4px}
+  .rail a span{position:absolute; left:30px; padding:4px 8px; border-radius:4px; background:var(--surface); border:1px solid var(--border); opacity:0; transform:translateX(-4px); pointer-events:none; transition:all .25s var(--ease-out)}
+  .rail a:hover span, .rail a:focus-visible span{opacity:1; transform:none}
+}
+.pill{position:fixed; z-index:8; left:50%; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); transform:translate(-50%, 10px); display:flex; align-items:center; gap:4px; padding:4px; border-radius:999px; background:var(--field); border:1px solid var(--field-line); box-shadow:0 8px 28px oklch(0.1 0.02 250 / 0.28)}
+.pill.show{opacity:.5; transform:translate(-50%, 0)}
+.pill:hover, .pill:focus-within, .pill.open{opacity:1}
+.pill button{all:unset; box-sizing:border-box; cursor:pointer; display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:0 16px; border-radius:999px; color:var(--field-ink); font:600 .75rem/1 var(--f-mono); letter-spacing:.14em; text-transform:uppercase; white-space:nowrap}
+.pill button:focus-visible{outline:2px solid var(--field-a); outline-offset:2px}
+@media (hover:hover){ .pill button:hover{background:oklch(0.965 0.005 250 / 0.1)} }
+.pill .sep{width:1px; height:20px; background:var(--field-line)}
+.pill .secbtn, .pill .sep{display:none}
+@media (max-width:1099px){ .pill .secbtn, .pill .sep{display:inline-flex} }
+.sheet{position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%); min-width:230px; padding:8px; border-radius:16px; background:var(--field); border:1px solid var(--field-line); box-shadow:0 12px 36px oklch(0.1 0.02 250 / 0.35)}
+.sheet ol{list-style:none; display:grid}
+.sheet a{display:flex; justify-content:space-between; gap:16px; padding:11px 14px; border-radius:10px; color:var(--field-ink-2); text-decoration:none; font-size:.9375rem}
+.sheet a.on{color:var(--field-ink); background:oklch(0.965 0.005 250 / 0.08)}
+.sheet a.on::after{content:"●"; color:var(--field-a); font-size:.6rem; align-self:center}
+@media (max-width:1099px){ .contact{padding-bottom:calc(var(--sp-xl) + 64px)} }
+
+#pres.collapsed .pub:nth-child(n+6){display:none}
+.more-btn{margin-top:18px}
+@media (max-width:640px){ #pres .au{display:none} }
+
 /* scroll-linked reveal: native CSS, transform-led, content stays visible at rest */
 @supports (animation-timeline: view()){
   @media (prefers-reduced-motion: no-preference){
@@ -540,7 +578,7 @@ a.stat{color:inherit; text-decoration:none; transition:background .3s var(--ease
       <span class="label">Presentations</span>
       <h2 class="h2">14 conference talks &amp; posters</h2>
     </div>
-    <ol class="pubs" id="pres">
+    <ol class="pubs collapsed" id="pres">
       <li class="pub"><span class="yr">2024</span><div>
         <h3>Cancer cell glucose metabolic reprogramming via a fluid shear stress activated PI3K pathway</h3>
         <p class="au"><b>I. Ortiz</b>, V.L. Dunagan, N.S. Sarna, W. Wang, G. Vasiukov, M.R. King, C.A. Reinhart-King</p>
@@ -598,6 +636,7 @@ a.stat{color:inherit; text-decoration:none; transition:background .3s var(--ease
         <p class="au"><b>I. Ortiz</b>, V. Mayo, A. Agarwal</p>
         <p class="meta"><span class="jr">BMES Annual Meeting, Philadelphia, PA</span><span class="tag">Presenter</span></p></div><span></span></li>
     </ol>
+    <button class="btn more-btn" type="button" id="presmore" aria-controls="pres" aria-expanded="false">Show all 14 <span class="arr">↓</span></button>
     <p class="note">BMES: Biomedical Engineering Society. VICC: Vanderbilt-Ingram Cancer Center. * Authors contributed equally.</p>
   </div>
 </section>
@@ -754,6 +793,36 @@ a.stat{color:inherit; text-decoration:none; transition:background .3s var(--ease
   </div>
 </section>
 
+<nav class="rail" id="rail" aria-label="Jump to section">
+  <ol>
+      <li><a href="#fit" data-sec="fit"><span>Where I fit</span></a></li>
+      <li><a href="#research" data-sec="research"><span>Research</span></a></li>
+      <li><a href="#publications" data-sec="publications"><span>Publications</span></a></li>
+      <li><a href="#presentations" data-sec="presentations"><span>Presentations</span></a></li>
+      <li><a href="#experience" data-sec="experience"><span>Experience</span></a></li>
+      <li><a href="#toolkit" data-sec="toolkit"><span>Toolkit &amp; honors</span></a></li>
+      <li><a href="#beyond" data-sec="beyond"><span>Beyond the lab</span></a></li>
+      <li><a href="#contact" data-sec="contact"><span>Contact</span></a></li>
+  </ol>
+</nav>
+<div class="pill" id="pill">
+  <div class="sheet" id="sheet" hidden>
+    <ol>
+        <li><a href="#fit" data-sec="fit">Where I fit</a></li>
+        <li><a href="#research" data-sec="research">Research</a></li>
+        <li><a href="#publications" data-sec="publications">Publications</a></li>
+        <li><a href="#presentations" data-sec="presentations">Presentations</a></li>
+        <li><a href="#experience" data-sec="experience">Experience</a></li>
+        <li><a href="#toolkit" data-sec="toolkit">Toolkit &amp; honors</a></li>
+        <li><a href="#beyond" data-sec="beyond">Beyond the lab</a></li>
+        <li><a href="#contact" data-sec="contact">Contact</a></li>
+    </ol>
+  </div>
+  <button type="button" class="secbtn" id="secbtn" aria-expanded="false" aria-controls="sheet">☰ Sections</button>
+  <span class="sep" aria-hidden="true"></span>
+  <button type="button" id="totop" aria-label="Back to top">↑ Top</button>
+</div>
+
 <script>
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -829,6 +898,30 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     try{ navigator.clipboard.writeText(addr.textContent.trim()).then(()=>{ out.textContent='Copied'; setTimeout(()=>out.textContent='',2200); }, sel); }
     catch(e){ sel(); }
   });
+})();
+
+
+// Presentations: show 5, expand to 14
+(function(){
+  const list=document.getElementById('pres'), b=document.getElementById('presmore');
+  b.addEventListener('click',()=>{ const open=list.classList.toggle('collapsed')===false; b.setAttribute('aria-expanded',String(open)); b.innerHTML=open?'Show fewer <span class="arr">↑</span>':'Show all 14 <span class="arr">↓</span>'; if(!open) list.scrollIntoView({block:'start'}); });
+})();
+
+// Floating wayfinding: show after the hero, track the active section, back-to-top, phone sections sheet
+(function(){
+  const rail=document.getElementById('rail'), pill=document.getElementById('pill'), sheet=document.getElementById('sheet'), secbtn=document.getElementById('secbtn');
+  const hero=document.getElementById('top');
+  function vis(){ const show=scrollY > hero.offsetHeight*0.6; rail.classList.toggle('show',show); pill.classList.toggle('show',show); if(!show) close(); }
+  addEventListener('scroll',()=>requestAnimationFrame(vis),{passive:true}); vis();
+  document.getElementById('totop').addEventListener('click',()=>{ close(); scrollTo({top:0, behavior:reduceMotion?'auto':'smooth'}); });
+  function close(){ sheet.hidden=true; secbtn.setAttribute('aria-expanded','false'); pill.classList.remove('open'); }
+  secbtn.addEventListener('click',e=>{ e.stopPropagation(); const open=sheet.hidden; sheet.hidden=!open; secbtn.setAttribute('aria-expanded', String(open)); pill.classList.toggle('open',open); });
+  sheet.addEventListener('click',e=>{ if(e.target.closest('a')) close(); });
+  document.addEventListener('click',e=>{ if(!pill.contains(e.target)) close(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
+  const links=document.querySelectorAll('[data-sec]');
+  const io=new IntersectionObserver(es=>{ es.forEach(en=>{ if(en.isIntersecting){ const id=en.target.id; links.forEach(a=>a.classList.toggle('on', a.dataset.sec===id)); } }); },{rootMargin:'-45% 0px -50% 0px'});
+  ['fit','research','publications','presentations','experience','toolkit','beyond','contact'].forEach(id=>{ const el=document.getElementById(id); if(el) io.observe(el); });
 })();
 
 // Hero field: cells advect in Poiseuille flow, v(y) = vmax * (1 - (2y/h - 1)^2); the pointer nudges cells aside
